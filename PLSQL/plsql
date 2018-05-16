@@ -24,3 +24,22 @@ ALTER TABLE Cliente ADD CONSTRAINT Cliente_id_pk PRIMARY KEY(ID);
 #ADICIONA CHAVE ESTRANGEIRA
 ALTER TABLE Cliente ADD CONSTRAINT Cliente_SegMercado_fk FOREIGN KEY(SegMercado_id) REFERENCES Segmercado(id) ;
 
+#BLOCO PL/SQL
+
+#LIGA VARIAVEL
+SET SERVEROUTPUT ON
+
+#DECLARAR VARIAVEIS
+DECLARE
+    v_id number(5) := 1;
+
+#INÍCIO DO BLOCO
+BEGIN
+    v_id := 2;
+    
+    #IMPRIME NO CONSOLE
+    Dbms_output.put_line(v_id);
+
+#FIM DO BLOCO
+END;
+
