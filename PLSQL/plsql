@@ -43,3 +43,46 @@ BEGIN
 #FIM DO BLOCO
 END;
 
+#BLOCO INSERT PL/SQL
+DECLARE
+    v_id number(5) := 1;
+    v_descricao varchar2(100) := 'varejo';
+
+BEGIN
+
+    INSERT INTO segmercado VALUES (v_id, v_descricao);
+    COMMIT;
+
+END;
+
+#BLOC PL/SQL SEM TIPOS(BOA PRÁTICA) + UPPERCASE
+DECLARE
+    v_id segmercado.id%type := 3;
+    v_descricao segmercado.descricao%type := 'atacado';
+BEGIN
+    INSERT INTO SEGMERCADO VALUES (v_id,upper(v_descricao));
+    COMMIT;
+END;
+
+#UPDATE
+DECLARE
+    v_id segmercado.id%type := 1;
+    v_descricao segmercado.descricao%type := 'varejista';
+BEGIN
+    UPDATE SEGMERCADO SET DESCRICAO = UPPER(v_descricao) WHERE id = v_id;
+    
+    v_id := 2;
+    v_descricao := 'atacadista';
+    
+    UPDATE SEGMERCADO SET DESCRICAO = UPPER(v_descricao) WHERE id = v_id;
+    COMMIT;
+END;
+
+#DELETE
+DECLARE
+    v_id segmercado.id%type := 3;
+BEGIN
+    DELETE FROM SEGMERCADO WHERE id = v_id;
+    COMMIT;
+END;
+
