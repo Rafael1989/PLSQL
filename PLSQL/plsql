@@ -656,3 +656,24 @@ GRANT EXECUTE ON INCLUIR_CLIENTE TO user_app;
 
 GRANT SELECT ON CLIENTE TO user_app;
 
+#CRIANDO SINONIMOS
+CREATE PUBLIC SYNONYM INCLUIR_CLIENTE FOR user_dev.INCLUIR_CLIENTE;
+CREATE PUBLIC SYNONYM ATUALIZAR_CLI_SEG_MERCADO FOR user_dev.ATUALIZAR_CLI_SEG_MERCADO;
+CREATE PUBLIC SYNONYM ATUALIZAR_FATURAMENTO_PREVISTO FOR user_dev.ATUALIZAR_FATURAMENTO_PREVISTO;
+CREATE PUBLIC SYNONYM EXCLUIR_CLIENTE FOR user_dev.EXCLUIR_CLIENTE;
+CREATE PUBLIC SYNONYM CLIENTE FOR user_dev.CLIENTE;
+
+#PROCEDURE CHAMANDO OUTRA COM SINONIMO
+CREATE OR REPLACE PROCEDURE APL_INCLUIR_CLIENTE
+   (p_id in cliente.id%type,
+    p_razao_social in cliente.razao_social%type,
+    p_CNPJ in cliente.CNPJ%type,
+    p_segmercado_id in cliente.segmercado_id%type,
+    p_faturamento_previsto in cliente.faturamento_previsto%type)
+IS
+BEGIN
+    incluir_cliente(p_id ,p_razao_social,p_cnpj,p_segmercado_id,p_faturamento_previsto);
+END;
+
+#EXECUTANDO PROCEDURE
+EXEC apl_incluir_cliente(6 ,'SEGUNDO CLIENTE INCLUIDO POR USER_APP','23456',2,100000);
