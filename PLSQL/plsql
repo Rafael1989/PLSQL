@@ -1400,3 +1400,77 @@ DROP PROCEDURE ATUALIZAR_CLI_SEG_MERCADO;
 DROP PROCEDURE ATUALIZAR_FATURAMENTO_PREVISTO;
 DROP PROCEDURE FORMAT_CNPJ;
 DROP FUNCTION OBTER_CATEGORIA_CLIENTE;
+
+#CRIANDO UM PACOTE PARA EXCEÇÕES
+CREATE OR REPLACE PACKAGE EXCEPTION_PAC
+IS
+    e_null exception;
+    pragma exception_init (e_null, -1400);
+
+    e_fk exception;
+    pragma exception_init (e_fk, -2291); 
+END;
+
+#DANDO PERMISSÃO PÚBLICA PARA O PACOTE SER EXECUTADO
+GRANT EXECUTE ON EXCEPTION_PAC TO PUBLIC;
+
+#CRIANDO UM SINÔNIMO PARA O PACOTE
+CREATE PUBLIC SYNONYM EXCEPTION_PAC FOR user_dev.EXCEPTION_PAC;
+
+#COLOCANDO TRATAMENTO DE EXCEÇÃO
+    PROCEDURE incluir_cliente (
+    p_id             IN cliente.id%TYPE,
+    p_razao_social   IN cliente.razao_social%TYPE,
+    p_cnpj           IN cliente.cnpj%TYPE
+) IS
+    v_categoria       cliente.categoria%TYPE;
+    v_cnpj            cliente.cnpj%TYPE := p_cnpj;
+    v_codigo_erro     NUMBER(5);
+    v_mensagem_erro   VARCHAR2(200);
+    v_dummy           NUMBER;
+BEGIN
+    format_cnpj(v_cnpj);
+    INSERT INTO cliente (
+        id,
+        razao_social,
+        cnpj,
+        data_inclusao
+    ) VALUES (
+        p_id,
+        upper(p_razao_social),
+        v_cnpj,
+        SYSDATE
+    );
+    COMMIT;
+EXCEPTION
+    WHEN dup_val_on_index THEN
+        raise_application_error(-20010,'Cliente já cadastrado');
+    WHEN exception_pac.e_null then
+        raise_application_error(-20012,'Preenchimento de campo obrigatório');
+    WHEN OTHERS THEN
+        v_codigo_erro := sqlcode;
+        v_mensagem_erro := sqlerrm;
+        raise_application_error(-20000,TO_CHAR(v_codigo_erro)
+        || v_mensagem_erro);
+END;
+
+#DANDO DIREITO DE FAZER SELECT E INSERT
+GRANT SELECT,INSERT ON SEGMERCADO TO USER_APP;
+
+#CRIANDO SINÔNIMO PARA A TABELA
+CREATE PUBLIC SYNONYM SEGMERCADO FOR user_dev.SEGMERCADO;
+
+#CRIANDO PROCEDURE
+CREATE OR REPLACE PROCEDURE INCLUIR_SEGMENTO
+    (P_ID IN SEGMERCADO.ID%TYPE,
+     P_DESCRICAO IN SEGMERCADO.DESCRICAO%TYPE)
+IS
+BEGIN
+    INSERT INTO SEGMERCADO VALUES (P_ID, UPPER(P_DESCRICAO));
+EXCEPTION
+    WHEN exception_pac.e_null then
+        raise_application_error (-20015,'Campo com preenchimento obrigatório');
+END;
+
+#TESTANDO ERRO NA PROCEDURE
+EXEC INCLUIR_SEGMENTO (null ,'SEGMENTO INCLUIDO POR USER_APP');
