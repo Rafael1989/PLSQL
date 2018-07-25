@@ -1474,3 +1474,34 @@ END;
 
 #TESTANDO ERRO NA PROCEDURE
 EXEC INCLUIR_SEGMENTO (null ,'SEGMENTO INCLUIDO POR USER_APP');
+
+#CRIAÇÃO DE CONSTANTES
+g_cli_lim_fatur_pequeno number(10) := 10000;
+g_cli_lim_fatur_medio number(10) := 50000;
+g_cli_lim_fatur_medio_grande number(10) := 100000;
+
+#UTILIZANDO AS CONSTANTES
+FUNCTION OBTER_CATEGORIA_CLIENTE (
+        p_faturamento_previsto IN cliente.faturamento_previsto%TYPE
+        ) RETURN cliente.categoria%TYPE
+    IS
+    BEGIN
+        IF
+            p_faturamento_previsto < g_cli_lim_fatur_pequeno
+        THEN
+            RETURN 'PEQUENO';
+        ELSIF p_faturamento_previsto < g_cli_lim_fatur_medio THEN
+            RETURN 'MEDIO';
+        ELSIF p_faturamento_previsto < g_cli_lim_fatur_medio_grande THEN
+            RETURN 'MEDIO GRANDE';
+        ELSE
+            RETURN 'GRANDE';
+        END IF;
+    END;
+    
+#EXECUTANDO A PROCEDURE
+EXEC APL_INCLUIR_CLIENTE(30 ,'INCLUIDO POR USER_APP VIA PACKAGE','34789',2,100000);
+
+#EXIBINDO CONSTANTE NO CONSOLE
+set SERVEROUTPUT ON
+EXEC dbms_output.put_line(cliente_pac.g_cli_lim_fatur_pequeno)
